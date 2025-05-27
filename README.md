@@ -43,7 +43,7 @@ model = LlavaOnevisionForConditionalGeneration.from_pretrained(
   Download and place in: `AutoSteer_final/dataset/COCO2014`
 
 - **NSFW-test-porn**  
-  Download the [NSFW Image Classification dataset](https://www.kaggle.com/datasets/itachi9604/dataset-for-nsfw-image-classification) from Kaggle. Use the "porn" class from the test set. Replace the empty directory:
+  Download the [NSFW Image Classification dataset](https://www.kaggle.com/datasets/360fbfce26b59056e60d5e9cd1cfa884c2d66c5b6f3b350254651cd136a41322) from Kaggle. Use the "porn" class from the test set. Replace the empty directory:
   ```
   AutoSteer_final/dataset/ToViLaG/porn
   ```

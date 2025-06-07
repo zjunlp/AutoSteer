@@ -31,7 +31,9 @@ model = LlavaOnevisionForConditionalGeneration.from_pretrained(
     cache_dir=cache_path
 )
 ```
-
+##### 1.1 Download Steer Matrix&Prober ckpt
+Visit https://huggingface.co/LewisSSSSSS/AutoSteer_ckpt to download the pretrained Steer Matrix and Prober checkpoints used in our experiments.
+If you prefer, you may also train them from scratch by yourself. Instructions can be found below.
 ---
 
 #### 2. Download Image Datasets
@@ -102,7 +104,21 @@ All above paths should be absolute path.
 ---
 
 ### 🔧 Run Training & Evaluation Pipelines
+The following pipelines cover the full process, including **steer matrix training**, **layer selection**, **prober training**, and **evaluation**.  
+You may customize the execution based on your needs.
 
+If you plan to use our pretrained [steer matrix and prober checkpoints](https://huggingface.co/LewisSSSSSS/AutoSteer_ckpt),  
+you can skip the following training-related scripts:
+
+- For **Chameleon**:
+  - `bash train_chameleon_steer.bash`
+  - `bash chameleon_prober_pipeline.bash`
+
+- For **Llava-OneVision**:
+  - `bash train_llava_steer.bash`
+  - `bash llava_prober_pipeline.bash`
+
+You can directly run the `test_*.bash` scripts to evaluate detoxification and general capabilities.
 ##### For **Chameleon**
 ```bash
 cd AutoSteer_final/source
@@ -158,7 +174,13 @@ AutoSteer_final/
 
 ## 📬 Contact
 
-For any questions or issues, feel free to open an [issue](https://github.com/your-repo/issues) or contact the dataset authors as noted above.
+For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact me via lyuchengwu@zju.edu.cn.
+
+---
+## 🤝 Acknowlegement
+
+Thanks to Xinpeng Wang and Donghyeon Won for sharing part of the datasets used in this project.
+We also appreciate Dr. Peixuan Han for his open-source prober implementation, which served as a valuable reference during our development.
 
 ---
 

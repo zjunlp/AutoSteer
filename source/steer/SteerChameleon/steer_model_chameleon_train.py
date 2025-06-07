@@ -66,7 +66,7 @@ class SteerModel(ChameleonForCausalLM):
             param.requires_grad = False
         self.STEER_matrix.requires_grad = True
 
-    # 保留原始 forward 方法
+    # Keep the original forward method
     @add_start_docstrings_to_model_forward(CHAMELEON_INPUTS_DOCSTRING)
     @replace_return_docstrings(output_type=CausalLMOutputWithPast, config_class=_CONFIG_FOR_DOC)
     def forward(
@@ -138,10 +138,8 @@ class SteerModel(ChameleonForCausalLM):
         emb = self.lm_head.weight
 
         logits = torch.matmul(hidden_states.to(DEVICE),((emb+ epsilon * torch.matmul(emb,self.STEER_matrix)).T))
-        #print(f"logits on device: {logits.device}")
         logits = logits.float()
-        #print(f"model is on(check1): {self.device}")
-        #get_gpu_status()
+
         loss = None
         if labels is not None:
             # Shift so that tokens < n predict n
@@ -192,20 +190,6 @@ def collate_fn(batch):
    
     return {'input_ids': batch_inputs_padded, 'attention_mask': attention_masks, 'labels': batch_labels_padded}
 
-# def collate_fn(batch):
-    
-#     batch_inputs = [item[0] for item in batch]
-#     batch_labels = [item[1] for item in batch]
-#     max_length = max(max(t.size(0) for t in batch_inputs), max(t.size(0) for t in batch_labels))
-
-#     inputs_padded = pad_sequence(batch_inputs, batch_first=True, padding_value=1)
-#     labels_padded = pad_sequence(batch_labels, batch_first=True, padding_value=-100)
-
-#     inputs_padded = nn.functional.pad(inputs_padded, (0, max_length - inputs_padded.size(1)), value=-100)
-#     labels_padded = nn.functional.pad(labels_padded, (0, max_length - labels_padded.size(1)), value=-100)
-
-#     attention_masks = (inputs_padded != -100).long()
-#     return {'input_ids': inputs_padded, 'attention_mask': attention_masks, 'labels': labels_padded}
 
 
 def train_model(model, dataset):

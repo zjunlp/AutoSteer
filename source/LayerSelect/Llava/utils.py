@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 class SafetyAwareness:
     def __init__(self, pos_npy_path, neg_npy_path):
         """
-        初始化：加载两个 .npy 文件，每个文件形状为 [N, D]
+        Initialize: Load two .npy files, each with shape [N, D]
         """
         self.pos_list = np.load(pos_npy_path, mmap_mode='r')
         self.neg_list = np.load(neg_npy_path, mmap_mode='r')
@@ -17,7 +17,7 @@ class SafetyAwareness:
 
     def random_select(self, sample_num):
         """
-        随机选择 sample_num 个索引（对 pos 和 neg 同步采样）
+        Randomly select sample_num indices (synchronously for pos and neg)
         """
         total = sample_num
         assert total <= len(self.pos_list), "样本数量超过数据集长度"
@@ -31,18 +31,18 @@ class SafetyAwareness:
 
     def calculate_safetyAwareness(self):
         """
-        计算安全感知度（平均余弦相似度）
+        Compute the safety awareness score (average cosine similarity)
         """
         if not self.selected:
             raise RuntimeError("You must run random_select() before calling calculate_safetyAwareness()")
 
-        # 差向量计算
+        # Get CAAs
         self.CAA_array = self.random_selected_pos_list - self.random_selected_neg_list
 
-        # 计算余弦相似度矩阵
+        # Compute cosine similarity matrix
         self.cosine_sim_matrix = cosine_similarity(self.CAA_array)
 
-        # 仅取非对角元素平均
+        # Average cosine similarity
         num_vectors = self.CAA_array.shape[0]
         upper_tri_indices = np.triu_indices(num_vectors, k=1)
         self.avg_cosine_similarity = np.mean(self.cosine_sim_matrix[upper_tri_indices])

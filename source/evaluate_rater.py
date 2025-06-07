@@ -43,8 +43,6 @@ def evaluate(model, dataloader, device):
         for embs, labels in dataloader:
             embs, labels = embs.to(device), labels.to(device)
             outputs = model(embs)
-            # print("------------------")
-            # print(outputs)
             preds = torch.argmax(outputs, dim=1)
             correct += (preds == labels).sum().item()
             total += labels.size(0)

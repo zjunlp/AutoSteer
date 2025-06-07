@@ -132,29 +132,16 @@ class ProbeModel(Qwen2Model):
         for i,decoder_layer in enumerate(self.layers[: self.config.num_hidden_layers]):
             if output_hidden_states:
                 all_hidden_states += (hidden_states,)
-            #print(f"This is layer [{i}]")
             if self.gen and self.first_pass and (i in self.selected_layers): 
-                # print(f"selected layer is {i}")
-                #print(f"hidden states' shape:{hidden_states.shape}")# 1,seq_len,emb_size
-                #print(f"len of emb_h is {len(self.emb_h)}")
                 self.emb_h.append(hidden_states[0][-1]) # take last token emb
-                # rate = self.rate(hidden_states[0][-1])
-                # print(hidden_states[0][-1])
-                # print(hidden_states[0][-1].dtype)
-                # print(f"rate is {rate}")
-                # if rate > self.threshhold:
-                #     print(f"toxicity exceeds threshold: {rate}")
 
             if self.need_rating and (i == self.selected_layer) and self.first_pass:
-                # emb = hidden_states[0]
-                # print(f"selected rating layer is {i}")
-                # print(emb_16th.shape)
                 rate = self.rate(hidden_states[0][-1])
                 if self.get_toxicity:
                     self.toxicity = rate
                 if rate > self.threshhold:
                     print(f"toxicity exceeds threshold: {rate}")
-                    epsilon = self.safety_ratio * self.fix_steer_epsilon # 0.05 is empirically good
+                    epsilon = self.safety_ratio * self.fix_steer_epsilon 
                 else : epsilon = 0
                 self.auto_epsilon = epsilon
 
@@ -209,12 +196,8 @@ class ProbeModel(Qwen2Model):
         return output if return_dict else output.to_tuple()
 
     def rate(self, emb):
-        #emb: seq_len*emb_size
-        # print(f"emb shape {emb.shape}")
         outputs = self.rater(emb)
-        # print(f"rater output is :{outputs}")
         toxicity = outputs[0] #idx 0 for toxicity possibility, within range [0, 1]
-        # print(f"toxicity is :{toxicity}")
         return toxicity
 
 class SteerModel(Qwen2ForCausalLM):
@@ -253,29 +236,6 @@ class SteerModel(Qwen2ForCausalLM):
             return self.model.auto_epsilon
         else:
             return self.fix_steer_epsilon
-    
-    # def set_fix_steer_epsilon(self,epsilon =0):
-    #     self.fix_steer_epsilon = epsilon
-    #     self.model.fix_steer_epsilon = epsilon
-
-    # def set_gen(self,gen = False):
-    #     self.model.gen = gen
-
-    # def set_selected_layer(self,selected_layer = 24):
-    #     self.model.selected_layer = selected_layer
-
-    # def set_selected_layers(self,selected_layers = [*range(4,29,4)]):
-    #     self.model.selected_layers = selected_layers  
-
-    # def set_need_rating(self,need_rating = False):
-    #     self.model.need_rating = need_rating
-
-
-    # def set_threshhold(self,threshhold = 0.5):
-    #     self.model.threshhold = threshhold
-
-    # def set_safety_ratio(self,safety_ratio=1.0):
-    #     self.model.safety_ratio = safety_ratio
     
     def get_generated_emb(self):
         return self.model.emb_h
@@ -363,7 +323,7 @@ class SteerModel(Qwen2ForCausalLM):
 
         epsilon = self.get_auto_epsilon()
         #emb = self.lm_head.weight
-        emb = self.lm_head.weight.float()       # 将语言模型头的权重转换为 float16
+        emb = self.lm_head.weight.float()       
         #print(f"steer epsilon is {epsilon}")
         logits = torch.matmul(hidden_states[:, slice_indices, :].float(),((emb+ epsilon * torch.matmul(emb,self.STEER_matrix)).T))
 
@@ -391,16 +351,6 @@ class SteerModelForConditionalGeneration(LlavaOnevisionForConditionalGeneration)
             gc.collect()
             torch.cuda.empty_cache()
         self.language_model = SteerModel._from_config(config.text_config)
-
-        # self.epsilon = 0
-        # self.gen = False
-        # self.selected_layer = 24
-        # self.selected_layers = [*range(4,29,4)]
-        # self.need_rating = False
-        # self.DEVICE = "cuda"
-        # self.rater_ckpt_pth = None
-        # self.threshhold = 0.5
-        # self.safety_ratio=1.0
 
     def set_epsilon(self,epsilon =0):
         self.language_model.set_fix_steer_epsilon(epsilon)
@@ -480,18 +430,8 @@ class Eval_Llava:
         #     - For MMMU format, options stored as strings are parsed into lists.
         #     - If the dataset format does not match any of the supported structures, 
         #       an error is raised.
-        # """
-        # 根据传入的路径，统一返回不同格式数据的标准接口。
-        
-        # 参数：
-        #     pth: 数据路径。当路径以 .jsonl 结尾时采用 VLSafe 格式；
-        #         否则使用 load_from_disk 加载，并根据数据字段区分 MMMU 或 realworld_qa 格式。
-        #     img_dir_pth: 如果使用 VLSafe 格式，则需要传入图片所在的根目录路径。
-        
-        # 返回：
-        #     处理后的输入列表，其内各项为符合 chameleon 接口要求的字典列表。
-        # """
-        # VLSafe 格式：直接从 JSONL 文件中读取
+
+        # VLSafe format: read directly from JSONL file
         if pth.endswith(".jsonl"):
             my_input = []
             with open(pth, 'r', encoding='utf-8') as f:
@@ -503,32 +443,32 @@ class Eval_Llava:
                     ])
             return my_input
 
-        # 非 JSONL 格式，通过 load_from_disk 加载数据
+        # Non-JSONL format, load data using load_from_disk
         dataset = load_from_disk(pth)
         input_to_chameleon = []
         if not dataset:
             raise ValueError("Dataset is empty. Please check the path or the dataset format.")
 
-        # 判断数据格式，参考第一个样本
+        # Determine the data format by inspecting the first sample
         sample = dataset[0]
-        # MMMU 格式：包含 "image_1" 和 "options"
+        # MMMU format: contains "image_1" and "options"
         if 'image_1' in sample and 'options' in sample:
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             for item in dataset:
                 image = item['image_1'].resize((256, 256))
                 query = item['question']
                 options = item['options']
-                # 如果选项以字符串形式存储，则转为列表
+                # If options are stored as a string, convert them to a list
                 if isinstance(options, str):
                     options = ast.literal_eval(options)
 
-                # 构建带选项字母标识的 prompt 文本
+                # Build prompt text with option letter labels
                 prompt_text = query.strip() + "\n"
                 for i, option in enumerate(options):
                     prompt_text += f"{letters[i]}. {option}\n"
                 prompt_text += "Please answer directly with only the letter of the correct option."
 
-                # 可选：对 prompt_text 按 <image 数字> 分割（此处保留原逻辑）
+                # Optional: Split prompt_text by <image number> (original logic retained here)
                 parts = re.split(r'<image\s*\d+>', prompt_text)
                 part1 = parts[0].strip()
                 part2 = parts[1].strip() if len(parts) > 1 else ''
@@ -540,7 +480,7 @@ class Eval_Llava:
                     {"type": "text", "content": part2},
                     {"type": "answer", "content": ans}
                 ])
-        # realworld_qa 格式：包含 "image" 和 "answer"
+        # realworld_qa format: contains "image" and "answer"
         elif 'image' in sample and 'answer' in sample:
             for item in dataset:
                 image = item['image'].resize((256, 256))
@@ -556,106 +496,15 @@ class Eval_Llava:
         
         return input_to_chameleon
     
-    def get_mmmu_examine_data(self,pth ):
-        dataset = load_from_disk(pth)
-        input_to_chameleon = []
-        for item in dataset:
-            image = item['image_1'].resize((256, 256))
-            query = item['question']
-            options = item['options']
-            
-            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            if isinstance(options,str):
-                options = ast.literal_eval(options)
-            #print(len(options))
-            prompt_text = query.strip() + "\n"
-            for i in range(len(options)):
-                prompt_text += letters[i]+". "+options[i]+"\n"
 
-            prompt_text += "Please answer directly with only the letter of the correct option."
-
-            parts = re.split(r'<image\s*\d+>', prompt_text)
-            part1 = parts[0].strip()
-            part2 = parts[1].strip() if len(parts) > 1 else ''
-
-            ans = item['answer']
-            input_to_chameleon.append([
-                    {"type": "text", "content": part1},
-                    {"type": "image", "content": image},
-                    {"type": "text", "content": part2},
-                    {"type": "answer", "content": ans}
-                ])
-        return input_to_chameleon
-    
-    def get_realworld_qa_examine_data(self,pth = "/mnt/20t/lyucheng/EvalDatasets/realworld_qa_500_sample"):
-        dataset = load_from_disk(pth)
-        input_to_chameleon = []
-        for item in dataset:
-            image = item['image'].resize((256, 256))
-            query = item['question']
-            ans = item['answer']
-            input_to_chameleon.append([
-                    {"type": "text", "content": query},
-                    {"type": "image", "content": image},
-                    {"type": "answer", "content": ans}
-                ])
-        return input_to_chameleon    
-    
-
-
-    def get_vlsafe_examine_data(self, pth="/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/examine_sampled_500_VLSafe.jsonl",img_dir_pth = "/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/COCO/train2017/"):
-        """获取VLSafe评估数据
-        
-        Args:
-            pth: VLSafe数据集路径
-            
-        Returns:
-            list: 包含评估数据的列表
-        """
-        
-        my_input = []
-        
-        # 读取VLSafe数据
-        with open(pth, 'r', encoding='utf-8') as f:
-            for line in f:
-                data = json.loads(line.strip())
-                my_input.append([
-                    {"type": "text", "content": data["query"]},
-                    {"type": "image", "content": img_dir_pth + data["image_id"]}
-                ])
-                
-        return my_input
-    
-    def get_examine_data(self, pth="/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/examine_sampled_500_VLSafe.jsonl",img_dir_pth = "/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/COCO/train2017/"):
-        """可以用于获取ToviLaG Plus和vlsafe评估数据,目的是作一个通用的接口
-        
-        Args:
-            pth: ToviLaG Plus数据集路径
-            
-        Returns:
-            list: 包含评估数据的列表
-        """
-        
-        my_input = []
-        
-        # 读取VLSafe数据
-        with open(pth, 'r', encoding='utf-8') as f:
-            for line in f:
-                data = json.loads(line.strip())
-                my_input.append([
-                    {"type": "text", "content": data["query"]},
-                    {"type": "image", "content": img_dir_pth + data["image_pth"]}
-                ])
-                
-        return my_input
     def get_vlasfe_convert_safe_data(pth="/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/vlsafe_convert_safe.jsonl",img_dir_pth = "/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/COCO/train2017/"):
-        """获取VLSafe评估数据
-        
+        """Get VLSafe converted safe data
+
         Args:
-            pth: VLSafe数据集路径
-            
+            pth: Path to the VLSafe dataset
+
         Returns:
-            list: 包含评估数据的列表
+            list: List containing the evaluation data
         """
         
         my_input = []
@@ -672,13 +521,13 @@ class Eval_Llava:
         return my_input
 
     def get_vlsafe_alignment_data(pth="/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/VLSafe_harmlessnss_alignment.jsonl",img_dir_pth = "/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/COCO/train2017/"):
-        """获取VLSafe评估数据
+        """Get VLSafe evaluation data
         
         Args:
-            pth: VLSafe数据集路径
+            pth: Path to the VLSafe dataset
             
         Returns:
-            list: 包含评估数据的列表
+            list: List containing the evaluation data
         """
         
         my_input = []
@@ -708,14 +557,14 @@ class Eval_Llava:
                         image = Image.open(abs_path)
                         image = image.resize((256,256))
                     else:
-                        print(f"警告: 图片路径 {abs_path} 不存在")
+                        print(f"Warning: image path {abs_path} does not exist")
                 elif isinstance(input_seg["content"], Image.Image):
                     image = input_seg["content"].resize((256,256))
                     #print("Image provided dirctly.")
                 else:
                     print("not path or Image")
             elif input_seg["type"] == "question_id":
-                # 存储问题ID以供后续使用
+                # Store the question ID for later use
                 self.question_id = input_seg["content"]
             elif input_seg["type"] == "answer":
                 #print(f"answer is {input_seg['content']}")

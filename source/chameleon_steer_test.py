@@ -25,8 +25,7 @@ from chameleon.inference.chameleon import ChameleonInferenceModel, Options, Toke
 from chameleon.inference.transformer import ModelArgs
 from steer.SteerChameleon.steer_model_chameleon_inference import SteerModel, Eval_Chameleon
 
-# # Set default model and file paths
-# tmr_pth = "/mnt/16t/lyucheng/ANOLE/Anole-7b-v0.1/models/7b"
+
 
 # Load model from consolidated weights and additional parameters
 def load_steer_model(path: str,
@@ -165,7 +164,7 @@ if __name__ == "__main__":
                 output_ids = torch.stack(output_ids).T
                 string_outputs = eval.process_chameleon_output_(token_manager, output_ids, output_pic_dir, i)
 
-                # 构建输出
+                # Construct output record
                 query = ""
                 ans = None
                 for segment in dataset[i]:
@@ -237,7 +236,7 @@ if __name__ == "__main__":
                     writer.write(record)
                 except Exception as e2:
                     print(f"[Error] Retry failed at index {i}: {e2}")
-                    continue  # 跳过该条
+                    continue  # skip this record
 
     print(f"Results saved to {output_file}")
     print("Evaluation completed.")

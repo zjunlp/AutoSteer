@@ -33,12 +33,7 @@ def convert2string(input):
 parser = argparse.ArgumentParser(description="Compute accuracy of model answers")
 parser.add_argument('-f','--result_file', type=str, required=True, help='Path to the JSONL file containing model answers and standard answers')
 args = parser.parse_args()
-# Replace with your file path
-# result_file = "/mnt/20t/lyucheng/QWen2vl/eval_5e-3_realworld_qa_results.jsonl"
-#result_file = "/mnt/20t/lyucheng/QWen2vl/eval_orig_realworld_qa_results.jsonl"
 result_file = args.result_file
-# #result_file = "/mnt/16t/lyucheng/ANOLE/model_output/general_ability/realworldqa/autosteer/text/eval_auto_rqa.jsonl"
-# Reading the JSONL file
 acc = 0
 total = 0
 with jsonlines.open(result_file) as reader:
@@ -62,12 +57,6 @@ with jsonlines.open(result_file) as reader:
         if flag:
             acc += 1
 
-        
-
-# for i,ans in enumerate(model_answer):
-#     if ans.lower() == standard_answer[i].lower():
-#         acc+=1
-#     else: print(i)
 acc/= total
 
 print(f"{result_file} has accuracy: {acc}")

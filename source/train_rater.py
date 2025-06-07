@@ -27,7 +27,6 @@ def parse_args():
     parser.add_argument("--save_ckpt_dir", type=str, default="", help="Directory to save checkpoints")
     parser.add_argument("--device", type=int, default=1, help="CUDA device number (e.g., 0 for 'cuda:0')")
     parser.add_argument("--hidden_size", type=int, default=4096, help="Hidden size for the model")
-    #parser.add_argument("-s", "--save_dir",type = str,default='rater_ckpt8')
 
     return parser.parse_args()
 
@@ -130,7 +129,7 @@ def train(model, train_dataloader, optimizer, criterion, save_dir, layer, num_ep
         accuracy = correct_preds / total_preds
         print(f"[Train] Epoch {epoch+1} - Loss: {avg_loss:.4f} - Accuracy: {accuracy:.4f}")
 
-        # 验证
+        # Vliadation
         if val_dataloader:
             model.eval()
             val_correct = 0
@@ -175,7 +174,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=collate_fn)
     val_dataloader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
 
-    rater = LinearProber(DEVICE=DEVICE, checkpoint_pth=None,hidden_sizes=[args.hidden_size,64,2]).to(DEVICE).to(torch.float32)#if float 16, 梯度消失
+    rater = LinearProber(DEVICE=DEVICE, checkpoint_pth=None,hidden_sizes=[args.hidden_size,64,2]).to(DEVICE).to(torch.float32)#if float 16, gradient will be nan(vanishing gradient problem)
 
 
     optimizer = AdamW(rater.parameters(), lr=learning_rate, weight_decay=1e-5)

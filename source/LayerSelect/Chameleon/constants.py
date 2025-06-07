@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 ckpt_path = Path(os.getenv("CKPT_PATH", "/mnt/16t/lyucheng/ANOLE/Anole-7b-v0.1"))
-# Raw dataset (specify the path of your raw dataset)
-# DATASET_RAW_PATH = Path("/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/train/output_examine.jsonl")
 DATASET_RAW_PATH = Path("/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/train/output_alignment.jsonl")
 
 # Tokenized dataset (specify the path that you want to store your tokenized dataset)

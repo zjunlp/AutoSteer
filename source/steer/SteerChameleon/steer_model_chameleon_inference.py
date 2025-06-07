@@ -8,8 +8,7 @@ from .constants import (
     MODEL_7B_PATH,
     STEER_MATRIX_PATH
 )
-# cur_dir_path = abspath(dirname(__file__))
-# sys.path.append(os.path.join(dirname(dirname(dirname(dirname(cur_dir_path)))),'ANOLE/anole'))
+
 sys.path.append(ANOLE_DIR_PATH)
 from torch.nn import CrossEntropyLoss
 import jsonlines
@@ -19,8 +18,6 @@ from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset, DataLoader
 from transformers import ChameleonForCausalLM
 from torch import nn
-# sys.path.append('/mnt/16t/lyucheng/ANOLE/anole/training/')
-# sys.path.append('/mnt/16t/lyucheng/ANOLE/anole/chameleon/')
 from chameleon.inference.transformer import Transformer
 
 import pandas as pd
@@ -28,8 +25,6 @@ tmr_pth = MODEL_7B_PATH
 from torch.optim import AdamW
 import json
 from tqdm import tqdm
-# os.environ["TORCH_USE_CUDA_DSA"]=str(1)
-#os.environ["CUDA_LAUNCH_BLOCKING"]=str(1)
 from transformers.optimization import Adafactor
 from PIL.Image import Image
 from datasets import load_from_disk
@@ -133,30 +128,21 @@ class SteerModel(Transformer):
         cache,
         group = None,
     ) -> torch.Tensor:
-        # print(token_values)
-        # print(type(attn_bias))
-        # print(attn_bias)
-        # print(type(cache))
-        # print(cache)
-        # h = self.tok_embeddings(token_values) ####.to(torch.float)
-        h = self.tok_embeddings(token_values) ####.to(torch.float)
+        h = self.tok_embeddings(token_values) 
 
         for i, layer in enumerate(self.layers):
-            #print(f"h {i} shape: {h.shape}")
-            #print(f"h {i}: {h}")
             if self.gen and self.first_pass and (i in self.selected_layers): 
                 self.emb_h.append(h[-1]) # take last token emb
                 
             
             if self.need_rating and i == self.selected_layer and self.first_pass:
                 emb = h
-                # print(emb_16th.shape)
                 rate = self.rate(emb[-1])
                 if self.get_toxicity:
                     self.toxicity = rate
                 if rate > self.threshhold:
                     print(f"toxicity exceeds threshold: {rate}")
-                    auto_epsilon = self.safety_ratio * self.epsilon # 0.05 is empirically good
+                    auto_epsilon = self.safety_ratio * self.epsilon 
                 else : auto_epsilon = 0
                 self.auto_epsilon = auto_epsilon
 
@@ -173,32 +159,14 @@ class SteerModel(Transformer):
             logits = torch.matmul(self.norm(h).to(self.DEVICE),((emb+ epsilon * torch.matmul(emb,self.STEER_matrix)).T))
         else:
             logits = torch.matmul(self.norm(h).to(self.DEVICE),emb.T)
-        # logits = self.tmr.output(self.tmr.norm(h))
 
         return logits.float()
     
     def rate(self, emb):
-        #emb: seq_len*emb_size
-        #print(f"emb shape {emb.shape}")
         outputs = self.rater(emb)
-        # print(f"rater output is :{outputs}")
         toxicity = outputs[0] #idx 0 for toxicity possibility, within range [0, 1]
         print(f"toxicity is :{toxicity}")
         return toxicity
-    # def auto_rate(self,tok_emb,vis_emb):
-    #     epsilon = self.balancer.calculate(tok_emb,vis_emb)[0] # returns (epsilon, final_score)
-    #     epsilon /= 10
-    #     return epsilon
-    
-    # def set_epsilon(self,epsilon):
-    #     self.balancer.set_autosteer(auto=False)
-    #     self.balancer.set_epsilon(epsilon=epsilon)
-    
-    # def set_need_rating(self,need=True):
-    #     self.need_rating=need
-
-    # def set_autosteer(self,auto=True):
-    #     self.balancer.set_autosteer(auto=auto)
 
     def generate_emb(self,token_values):
         print(token_values)
@@ -239,18 +207,7 @@ class Eval_Chameleon:
         #     - For MMMU format, options stored as strings are parsed into lists.
         #     - If the dataset format does not match any of the supported structures, 
         #       an error is raised.
-        # """
-        # 根据传入的路径，统一返回不同格式数据的标准接口。
-        
-        # 参数：
-        #     pth: 数据路径。当路径以 .jsonl 结尾时采用 VLSafe 格式；
-        #         否则使用 load_from_disk 加载，并根据数据字段区分 MMMU 或 realworld_qa 格式。
-        #     img_dir_pth: 如果使用 VLSafe 格式，则需要传入图片所在的根目录路径。
-        
-        # 返回：
-        #     处理后的输入列表，其内各项为符合 chameleon 接口要求的字典列表。
-        # """
-        # VLSafe 格式：直接从 JSONL 文件中读取
+
         if pth.endswith(".jsonl"):
             my_input = []
             with open(pth, 'r', encoding='utf-8') as f:
@@ -262,32 +219,32 @@ class Eval_Chameleon:
                     ])
             return my_input
 
-        # 非 JSONL 格式，通过 load_from_disk 加载数据
+        # For non-JSONL formats, load data using load_from_disk
         dataset = load_from_disk(pth)
         input_to_chameleon = []
         if not dataset:
             raise ValueError("Dataset is empty. Please check the path or the dataset format.")
 
-        # 判断数据格式，参考第一个样本
+        # Determine the data format by inspecting the first sample
         sample = dataset[0]
-        # MMMU 格式：包含 "image_1" 和 "options"
+        # MMMU format: contains "image_1" and "options"
         if 'image_1' in sample and 'options' in sample:
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             for item in dataset:
                 image = item['image_1'].resize((256, 256))
                 query = item['question']
                 options = item['options']
-                # 如果选项以字符串形式存储，则转为列表
+                # If options are stored as a string, convert to a list
                 if isinstance(options, str):
                     options = ast.literal_eval(options)
 
-                # 构建带选项字母标识的 prompt 文本
+                # Build prompt text with option letter identifiers
                 prompt_text = query.strip() + "\n"
                 for i, option in enumerate(options):
                     prompt_text += f"{letters[i]}. {option}\n"
                 prompt_text += "Please answer directly with only the letter of the correct option."
 
-                # 可选：对 prompt_text 按 <image 数字> 分割（此处保留原逻辑）
+                # Optional: Split prompt_text by <image number> (original logic retained here)
                 parts = re.split(r'<image\s*\d+>', prompt_text)
                 part1 = parts[0].strip()
                 part2 = parts[1].strip() if len(parts) > 1 else ''
@@ -299,7 +256,7 @@ class Eval_Chameleon:
                     {"type": "text", "content": part2},
                     {"type": "answer", "content": ans}
                 ])
-        # realworld_qa 格式：包含 "image" 和 "answer"
+        # realworld_qa format: contains "image" and "answer"
         elif 'image' in sample and 'answer' in sample:
             for item in dataset:
                 image = item['image'].resize((256, 256))
@@ -314,107 +271,6 @@ class Eval_Chameleon:
             raise ValueError("Unrecognized dataset format. The input data does not match any known structure.")
         
         return input_to_chameleon
-    def get_mmmu_examine_data(self,pth):
-        dataset = load_from_disk(pth)
-        input_to_chameleon = []
-        for item in dataset:
-            image = item['image_1'].resize((256, 256))
-            query = item['question']
-            options = item['options']
-            
-            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            if isinstance(options,str):
-                options = ast.literal_eval(options)
-            #print(len(options))
-            prompt_text = query.strip() + "\n"
-            for i in range(len(options)):
-                prompt_text += letters[i]+". "+options[i]+"\n"
-
-            prompt_text += "Please answer directly with only the letter of the correct option."
-
-            parts = re.split(r'<image\s*\d+>', prompt_text)
-            part1 = parts[0].strip()
-            part2 = parts[1].strip() if len(parts) > 1 else ''
-
-            ans = item['answer']
-            input_to_chameleon.append([
-                    {"type": "text", "content": part1},
-                    {"type": "image", "content": image},
-                    {"type": "text", "content": part2},
-                    {"type": "answer", "content": ans}
-                ])
-        return input_to_chameleon
-    
-    def get_realworld_qa_examine_data(self,pth = "/mnt/20t/lyucheng/EvalDatasets/realworld_qa_500_sample"):
-        dataset = load_from_disk(pth)
-        input_to_chameleon = []
-        for item in dataset:
-            image = item['image'].resize((256, 256))
-            query = item['question']
-            ans = item['answer']
-            input_to_chameleon.append([
-                    {"type": "text", "content": query},
-                    {"type": "image", "content": image},
-                    {"type": "answer", "content": ans}
-                ])
-        return input_to_chameleon
-
-    def get_mllmguard_noise_examine_data(self,pth = "/mnt/16t/lyucheng/ANOLE/dataset/MLLMGuard/desensitize/noise-injection/en.csv"):
-        df = pd.read_csv(pth)
-        # 显示前几行数据
-        print(df.head())
-
-        # 显示数据基本信息
-        print(df.info())
-
-        # 显示统计信息
-        print(df.describe())
-
-    def get_vlasfe_examine_data(self, pth="/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/examine_sampled_500_VLSafe.jsonl",img_dir_pth = "/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/COCO/train2017/"):
-        """获取VLSafe评估数据
-        
-        Args:
-            pth: VLSafe数据集路径
-            
-        Returns:
-            list: 包含评估数据的列表
-        """
-        
-        my_input = []
-        
-        # 读取VLSafe数据
-        with open(pth, 'r', encoding='utf-8') as f:
-            for line in f:
-                data = json.loads(line.strip())
-                my_input.append([
-                    {"type": "text", "content": data["query"]},
-                    {"type": "image", "content": img_dir_pth + data["image_id"]}
-                ])
-                
-        return my_input
-    
-    def get_examine_data(self, pth="/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/VLSafe/examine_sampled_500_VLSafe.jsonl",img_dir_pth = "/mnt/16t/lyucheng/ANOLE/dataset/train_dataset/COCO/train2017/"):
-        """可以用于获取ToviLaG Plus和vlsafe评估数据,目的是作一个通用的接口
-        
-        Args:
-            pth: ToviLaG Plus数据集路径
-            
-        Returns:
-            list: 包含评估数据的列表
-        """
-        
-        my_input = []
-        
-        # 读取VLSafe数据
-        with open(pth, 'r', encoding='utf-8') as f:
-            for line in f:
-                data = json.loads(line.strip())
-                my_input.append([
-                    {"type": "text", "content": data["query"]},
-                    {"type": "image", "content": img_dir_pth + data["image_pth"]}
-                ])
-                
-        return my_input
     
     def split_token_sequence(
         self,
@@ -452,13 +308,13 @@ class Eval_Chameleon:
         return segments
 
     def process_chameleon_input(self, input_data):
-        """处理输入数据,转换为Chameleon模型需要的格式
+        """Process input data and convert it to the format required by the Chameleon model.
         
         Args:
-            input_data: 输入数据列表,每个元素包含type和content字段
+            input_data: List of input data, each element contains 'type' and 'content' fields.
             
         Returns:
-            batch_prompt_ui: 处理后的输入格式 
+            batch_prompt_ui: The processed input format.
         """
         batch_prompt_ui = [[]]
         for input_seg in input_data:
@@ -475,7 +331,7 @@ class Eval_Chameleon:
                             {"type": "image", "value": f"file:{abs_path}"}
                         )
                     else:
-                        print(f"警告: 图片路径 {abs_path} 不存在")
+                        print(f"Warning: Image path {abs_path} does not exist")
                 elif isinstance(input_seg["content"], Image):
                     batch_prompt_ui[0].append(
                         {"type": "image", "value": input_seg["content"]}
@@ -484,7 +340,7 @@ class Eval_Chameleon:
                 else:
                     print("not path or Image")
             elif input_seg["type"] == "question_id":
-                # 存储问题ID以供后续使用
+                # Store question ID for later use
                 self.question_id = input_seg["content"]
             elif input_seg["type"] == "answer":
                 #print(f"answer is {input_seg['content']}")

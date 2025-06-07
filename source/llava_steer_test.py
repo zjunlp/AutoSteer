@@ -10,15 +10,8 @@ import argparse
 from distutils.util import strtobool 
 from tqdm import tqdm
 from steer.SteerLlava.rater import LinearProber
-# def get_vlsafe_examine_data(pth = ""):
-#     conversation = [
-#         {"role": "user", "content": [{"type": "text", "text": question}, {"type": "image"}]},
-#     ]
-#     prompt_text = processor.apply_chat_template(conversation, add_generation_prompt=False, add_image_tokens=True)
-
 
 cache_path = model_path
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Llava Model Inference")
@@ -56,18 +49,13 @@ if __name__ == "__main__":
     model = SteerModelForConditionalGeneration.from_pretrained(
         "llava-hf/llava-onevision-qwen2-7b-ov-hf", cache_dir=cache_path, torch_dtype=torch.float16, config=config
     ).to(DEVICE)
-    # model.set_parameters(epsilon=args.epsilon, 
-    #                       probe_layer=args.layer,
-    #                       need_rating=bool(strtobool(args.auto)),
-    #                       threshhold=0.5
-    #                       )
+
     if steer_config["need_rating"]:
         model.language_model.model.rater = LinearProber(DEVICE=DEVICE,checkpoint_pth= args.rater_ckpt,hidden_sizes=[3584,64,2]).to(DEVICE).to(dtype=torch.float16)#必须加，不然rater加载的有问题；问题暂不明确
 
     model.eval()
 
     eval = Eval_Llava(processor=processor)
-    # dataset = eval.get_vlsafe_examine_data()
     dataset = eval.get_unified_examine_data(pth = args.test_dataset, img_dir_pth= args.img_dir)
 
     os.makedirs(os.path.dirname(args.output_file), exist_ok=True)
@@ -78,7 +66,7 @@ if __name__ == "__main__":
         model.set_first_pass()
         
         try:
-            output = model.generate(**input_data, max_new_tokens=150, pad_token_id=151645)#原151645，151643是train的padding
+            output = model.generate(**input_data, max_new_tokens=150, pad_token_id=151645)#151645, open-end generation padding
             output_str = processor.decode(output[0], skip_special_tokens=True, pad_token_id=151645)
             answer = output_str.split("assistant", 1)[1].strip() if "assistant" in output_str else output_str.strip()
         except StopIteration:
@@ -91,7 +79,7 @@ if __name__ == "__main__":
             elif item["type"] == "answer":
                 gt_answer = item["content"]
 
-        # 构造输出字典
+        # Construct the output
         line = {
             "query": query,
             "model_ans": answer
@@ -99,7 +87,7 @@ if __name__ == "__main__":
         if gt_answer is not None:
             line["answer"] = gt_answer
 
-        # 加入toxicity字段（注意转换为float）
+        # Add toxicity field if required(converted to float)
         if steer_config["get_toxicity"]:
             toxicity = model.language_model.model.toxicity
             if isinstance(toxicity, torch.Tensor):

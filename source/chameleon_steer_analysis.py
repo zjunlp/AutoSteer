@@ -25,8 +25,6 @@ from chameleon.inference.chameleon import ChameleonInferenceModel, Options, Toke
 from chameleon.inference.transformer import ModelArgs
 from steer.SteerChameleon.steer_model_chameleon_inference import SteerModel, Eval_Chameleon
 
-# # Set default model and file paths
-# tmr_pth = "/mnt/16t/lyucheng/ANOLE/Anole-7b-v0.1/models/7b"
 
 # Load model from consolidated weights and additional parameters
 def load_steer_model(path: str,
@@ -165,7 +163,7 @@ if __name__ == "__main__":
             output_ids = torch.stack(output_ids).T
             string_outputs = eval.process_chameleon_output_(token_manager, output_ids, output_pic_dir, i)
 
-            # 构建输出
+            # Construct record for output
             query = ""
             ans = None
             image_pth =None
@@ -191,100 +189,6 @@ if __name__ == "__main__":
                 record['image_pth'] = image_pth
                 
             writer.write(record)
-            # try:
-            #     input = eval.process_chameleon_input(input)
-            #     batch_input_ids = [
-            #         token_manager.tokens_from_ui(prompt_ui)
-            #         for prompt_ui in input
-            #     ]
-
-            #     output = []
-            #     Smodel.first_pass = True
-            #     for token in Generator(
-            #         model=Smodel,
-            #         vocab=token_manager.vocab,
-            #         options=options,
-            #         input_ids=batch_input_ids,
-            #     ):
-            #         output.append(token)
-
-            #     output_ids = [t.id for t in output]
-            #     output_ids = torch.stack(output_ids).T
-            #     string_outputs = eval.process_chameleon_output_(token_manager, output_ids, output_pic_dir, i)
-
-            #     # 构建输出
-            #     query = ""
-            #     ans = None
-            #     for segment in dataset[i]:
-            #         if segment['type'] == 'text':
-            #             query += segment['content']
-            #         elif segment['type'] == 'answer':
-            #             ans = segment['content']
-
-            #     record = {'query': query, 'model_ans': string_outputs}
-            #     if ans is not None:
-            #         record['answer'] = ans
-            #     if get_toxicity:
-            #         toxicity = Smodel.toxicity
-            #         if isinstance(toxicity, torch.Tensor):
-            #             toxicity = float(toxicity.item())
-            #         else:
-            #             toxicity = float(toxicity)
-            #         record['toxicity'] = toxicity
-
-            #     writer.write(record)
-
-            # except Exception as e:
-            #     print(f"[Warning] Error occurred at index {i}: {e}")
-            #     print("[Info] Retrying once...")
-
-            #     try:
-            #         torch.cuda.empty_cache()
-            #         input = dataset[i]
-            #         input = eval.process_chameleon_input(input)
-            #         batch_input_ids = [
-            #             token_manager.tokens_from_ui(prompt_ui)
-            #             for prompt_ui in input
-            #         ]
-
-            #         output = []
-            #         Smodel.first_pass = True
-            #         for token in Generator(
-            #             model=Smodel,
-            #             vocab=token_manager.vocab,
-            #             options=options,
-            #             input_ids=batch_input_ids,
-            #         ):
-            #             output.append(token)
-
-            #         output_ids = [t.id for t in output]
-            #         output_ids = torch.stack(output_ids).T
-            #         string_outputs = eval.process_chameleon_output_(token_manager, output_ids, output_pic_dir, i)
-
-            #         # 构建输出
-            #         query = ""
-            #         ans = None
-            #         for segment in dataset[i]:
-            #             if segment['type'] == 'text':
-            #                 query += segment['content']
-            #             elif segment['type'] == 'answer':
-            #                 ans = segment['content']
-
-            #         record = {'query': query, 'model_ans': string_outputs}
-            #         if ans is not None:
-            #             record['answer'] = ans
-            #         if get_toxicity:
-            #             toxicity = Smodel.toxicity
-            #             if isinstance(toxicity, torch.Tensor):
-            #                 toxicity = float(toxicity.item())
-            #             else:
-            #                 toxicity = float(toxicity)
-            #             record['toxicity'] = toxicity
-
-            #         writer.write(record)
-            #     except Exception as e2:
-            #         print(f"[Error] Retry failed at index {i}: {e2}")
-            #         continue  # 跳过该条
 
     print(f"Results saved to {output_file}")
     print("Evaluation completed.")

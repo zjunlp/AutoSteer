@@ -215,7 +215,7 @@ class SteerDataset(Dataset):
 
         image_token_id = self.processor.tokenizer.convert_tokens_to_ids("<image>")
         image_token_index = (inputs["input_ids"] == image_token_id).nonzero(as_tuple=True)[1][-1].item()
-        labels[:, :image_token_index + 1] = -100  # 包括 <image> 位置之前的全部设为忽略
+        labels[:, :image_token_index + 1] = -100  # Mask all tokens before and including <image> position
 
         return {
             "input_ids": inputs["input_ids"].squeeze(0),
@@ -244,7 +244,7 @@ class SteerDataset_PIC(Dataset):
         question = item["query"]
         answer = "I'm sorry, but I can't assist with that."  # Placeholder answer
 
-        # 构造多模态对话模板
+        # Construct multimodal dialogue template
         conversation = [
             {"role": "user", "content": [{"type": "text", "text": question}, {"type": "image"}]},
             {"role": "assistant", "content": [{"type": "text", "text": answer}]}
@@ -261,10 +261,10 @@ class SteerDataset_PIC(Dataset):
         )
 
         labels = inputs["input_ids"].clone()
-        # Mask掉输入部分，只监督生成回答
+        # Mask the input part, only supervise the generated answer
         image_token_id = self.processor.tokenizer.convert_tokens_to_ids("<image>")
         image_token_index = (inputs["input_ids"] == image_token_id).nonzero(as_tuple=True)[1][-1].item()
-        labels[:, :image_token_index + 1] = -100  # 包括 <image> 位置之前的全部设为忽略
+        labels[:, :image_token_index + 1] = -100  # Mask all tokens before and including <image> position
 
         return {
             "input_ids": inputs["input_ids"].squeeze(0),

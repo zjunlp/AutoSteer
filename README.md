@@ -10,9 +10,36 @@ AutoSteer is a plug-and-play safety steering framework for multimodal large lang
 #### 1. Download Models
 
 **Chameleon**  
-Download the model checkpoint and project from [GAIR-NLP/anole](https://github.com/GAIR-NLP/anole).
+<!-- Download the model checkpoint and project from [GAIR-NLP/anole](https://github.com/GAIR-NLP/anole). -->
+Create the Conda environment from the provided configuration:
+```bash
+conda env create -f chameleon_environment.yml
+```
+
+Download the model: Anole or Chameleon
+```bash
+git lfs install
+git clone https://huggingface.co/GAIR/Anole-7b-v0.1
+```
+or
+```bash
+
+huggingface-cli download --resume-download GAIR/Anole-7b-v0.1 --local-dir Anole-7b-v0.1 --local-dir-use-symlinks False
+```
+Install transformers from the chameleon branch (already included in [this](https://github.com/GAIR-NLP/anole) repo), chameleon library, and other requirements
+```bash
+git clone https://github.com/GAIR-NLP/anole.git
+cd anole
+bash install.sh
+```
 
 **Llava-OneVision**  
+
+Create the Conda environment from the provided configuration:
+```bash
+conda env create -f llava_environment.yml
+```
+
 Use the following code snippet to download the model:
 
 ```python
@@ -32,8 +59,10 @@ model = LlavaOnevisionForConditionalGeneration.from_pretrained(
 )
 ```
 ##### 1.1 Download Steer Matrix&Prober ckpt
-Visit https://huggingface.co/LewisSSSSSS/AutoSteer_ckpt to download the pretrained Steer Matrix and Prober checkpoints used in our experiments.
-If you prefer, you may also train them from scratch by yourself. Instructions can be found below.
+
+Visit this [link](https://huggingface.co/LewisSSSSSS/AutoSteer_ckpt) to download the pretrained Steer Matrix and Prober checkpoints used in our experiments.
+If you prefer, you may also train them from scratch by yourself. Instructions can be found in below pipelines.
+
 ---
 
 #### 2. Download Image Datasets

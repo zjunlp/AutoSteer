@@ -14,6 +14,8 @@ AutoSteer is a plug-and-play safety steering framework for multimodal large lang
 Create the Conda environment from the provided configuration:
 ```bash
 conda env create -f chameleon_environment.yml
+conda activate ANOLE
+pip install -r chameleon_requirements.txt
 ```
 
 Download the model: Anole or Chameleon
@@ -26,18 +28,20 @@ or
 
 huggingface-cli download --resume-download GAIR/Anole-7b-v0.1 --local-dir Anole-7b-v0.1 --local-dir-use-symlinks False
 ```
-Install transformers from the chameleon branch (already included in [this](https://github.com/GAIR-NLP/anole) repo), chameleon library, and other requirements
+<!-- Install transformers from the chameleon branch (already included in [this](https://github.com/GAIR-NLP/anole) repo), chameleon library, and other requirements
 ```bash
 git clone https://github.com/GAIR-NLP/anole.git
 cd anole
 bash install.sh
-```
+``` -->
 
 **Llava-OneVision**  
 
 Create the Conda environment from the provided configuration:
 ```bash
 conda env create -f llava_environment.yml
+conda activate llava
+pip install -r llava_requirements.txt
 ```
 
 Use the following code snippet to download the model:
@@ -60,7 +64,7 @@ model = LlavaOnevisionForConditionalGeneration.from_pretrained(
 ```
 ##### 1.1 Download Steer Matrix&Prober ckpt
 
-Visit this [link](https://huggingface.co/LewisSSSSSS/AutoSteer_ckpt) to download the pretrained Steer Matrix and Prober checkpoints used in our experiments.
+You can [download the pretrained Steer Matrix and Prober checkpoints](https://huggingface.co/zjunlp/AutoSteer_ckpt) used in our experiments.
 If you prefer, you may also train them from scratch by yourself. Instructions can be found in below pipelines.
 
 ---
@@ -150,6 +154,7 @@ you can skip the following training-related scripts:
 You can directly run the `test_*.bash` scripts to evaluate detoxification and general capabilities.
 ##### For **Chameleon**
 ```bash
+conda activate ANOLE
 cd AutoSteer_final/source
 bash train_chameleon_steer.bash
 bash select_layer_chameleon.bash
@@ -159,6 +164,7 @@ bash test_chameleon.bash
 
 ##### For **Llava-OneVision**
 ```bash
+conda activate llava
 cd AutoSteer_final/source
 bash train_llava_steer.bash
 bash select_layer_llava.bash

@@ -72,10 +72,10 @@ If you prefer, you may also train them from scratch by yourself. Instructions ca
 #### 2. Download Image Datasets
 
 - **COCO train2017**  
-  Download and place in: `AutoSteer_final/dataset/COCO`
+  [Download](http://images.cocodataset.org/zips/train2017.zip) and place in: `AutoSteer_final/dataset/COCO`
 
 - **COCO2014**  
-  Download and place in: `AutoSteer_final/dataset/COCO2014`
+  Goto [link](https://www.modelscope.cn/datasets/OmniData/COCO_2014/files) to download and place in: `AutoSteer_final/dataset/COCO2014`
 
 - **NSFW-test-porn**  
   Download the [NSFW Image Classification dataset](https://www.kaggle.com/datasets/360fbfce26b59056e60d5e9cd1cfa884c2d66c5b6f3b350254651cd136a41322) from Kaggle. Use the "porn" class from the test set. Replace the empty directory:

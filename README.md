@@ -209,7 +209,7 @@ AutoSteer_final/
 
 ## 📬 Contact
 
-For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact me via lyuchengwu@zju.edu.cn.
+For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact me via lyuchengwu@zju.edu.cn or lyuchengwu@u.nus.edu.
 
 ---
 ## 🤝 Acknowlegement

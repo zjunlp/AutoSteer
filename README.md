@@ -214,8 +214,9 @@ For any questions or issues, feel free to open an [issue](https://github.com/zju
 ---
 ## 🤝 Acknowlegement
 
-Thanks to Xinpeng Wang and Donghyeon Won for sharing part of the datasets used in this project.
-We also appreciate Dr. Peixuan Han for his open-source prober implementation, which served as a valuable reference during our development.
+We sincerely thank **Xinpeng Wang** and **Donghyeon Won** for providing parts of the datasets used in this project, which originate from their works: [ToViLaG](https://github.com/victorup/ToViLaG) and [protest-detection-violence-estimation](https://github.com/wondonghyeon/protest-detection-violence-estimation).
+
+We also gratefully acknowledge **Dr. Peixuan Han** for his [open-source prober implementation](https://github.com/Hanpx20/SafeSwitch/blob/master/src/utils.py) from work [SafeSwitch](https://github.com/Hanpx20/SafeSwitch), which served as a valuable reference during our development.
 
 ---
 

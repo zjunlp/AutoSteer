@@ -1,4 +1,3 @@
-# visualize_caa_heatmap.py
 import os
 import numpy as np
 import argparse
@@ -17,20 +16,30 @@ def load_caa(pos_path, neg_path, sample_num):
     idx = np.random.choice(pos.shape[0], size=sample_num, replace=False)
     return pos[idx] - neg[idx]
 
-def visualize_heatmap(caa, layer, output):
+
+def visualize_heatmap(caa, layer, output, vmin, vmax):
     """
-    Compute cosine-similarity matrix and plot as heatmap.
+    Compute cosine-similarity matrix and plot as heatmap with fixed scale.
     """
     os.makedirs(os.path.dirname(output), exist_ok=True)
     sim_matrix = cosine_similarity(caa)
+
     plt.figure(figsize=(8, 6))
-    sns.heatmap(sim_matrix, cmap="viridis")
-    plt.title(f"Layer {layer} CAA Cosine Similarity")
-    plt.xlabel("Sample Index")
-    plt.ylabel("Sample Index")
+    ax = sns.heatmap(
+        sim_matrix, cmap="viridis_r",
+        vmin=vmin, vmax=vmax,  # 固定 color scale
+        cbar=True, xticklabels=False, yticklabels=False
+    )
+
+    cbar = ax.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=16)
+
+    plt.title(f"Layer {layer} CAA Cosine Similarity", fontsize=18)
+
     plt.tight_layout()
     plt.savefig(output, dpi=300)
-    plt.show()
+    plt.close()
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -60,9 +69,18 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
+    all_sim_values = []
+
     for layer in args.layers:
-        out_path = os.path.join(args.output_dir, f"layer_{layer}_heatmap.png")
         pos_path = os.path.join(args.pos_dir, f"{layer}layer.npy")
         neg_path = os.path.join(args.neg_dir, f"{layer}layer.npy")
         caa = load_caa(pos_path, neg_path, args.sample_num)
-        visualize_heatmap(caa, layer, out_path)
+        sim_matrix = cosine_similarity(caa)
+        all_sim_values.append(sim_matrix)
+
+    all_sim_concat = np.concatenate([s.flatten() for s in all_sim_values])
+    global_vmin, global_vmax = all_sim_concat.min(), all_sim_concat.max()
+
+    for layer, sim_matrix in zip(args.layers, all_sim_values):
+        out_path = os.path.join(args.output_dir, f"layer_{layer}_heatmap.png")
+        visualize_heatmap(caa=sim_matrix, layer=layer, output=out_path, vmin=global_vmin, vmax=global_vmax)

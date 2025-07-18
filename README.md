@@ -209,9 +209,33 @@ AutoSteer_final/
 
 ## 📬 Contact
 
-For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact me via lyuchengwu@zju.edu.cn or lyuchengwu@u.nus.edu.
+For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact me via lyuchengwu@zju.edu.cn or shumin@nus.edu.sg.
 
 ---
+
+## How to Cite
+📋 Thank you very much for your interest in our work. If you use or extend our work, please cite the following paper:
+
+```bibtex
+@misc{2025_AutoSteer,
+  author        = {Lyucheng Wu and 
+                  Mengru Wang and 
+                  Ziwen Xu and 
+                  Tri Cao and 
+                  Nay Oo and 
+                  Bryan Hooi and 
+                  Shumin Deng},
+  title         = {Automating Steering for Safe Multimodal Large Language Models},
+  eprint        = {2507.13255},
+  archivePrefix ={arXiv},
+  primaryClass  ={cs.CL},
+  year          = {2025},
+  url           = {https://arxiv.org/abs/2507.13255}
+}
+```
+
+---
+
 ## 🤝 Acknowlegement
 
 We sincerely thank **Xinpeng Wang** and **Donghyeon Won** for providing parts of the datasets used in this project, which originate from their works: [ToViLaG](https://github.com/victorup/ToViLaG) and [protest-detection-violence-estimation](https://github.com/wondonghyeon/protest-detection-violence-estimation).

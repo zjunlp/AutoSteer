@@ -227,8 +227,8 @@ For any questions or issues, feel free to open an [issue](https://github.com/zju
                   Shumin Deng},
   title         = {Automating Steering for Safe Multimodal Large Language Models},
   eprint        = {2507.13255},
-  archivePrefix ={arXiv},
-  primaryClass  ={cs.CL},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL},
   year          = {2025},
   url           = {https://arxiv.org/abs/2507.13255}
 }

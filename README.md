@@ -219,12 +219,12 @@ For any questions or issues, feel free to open an [issue](https://github.com/zju
 ```bibtex
 @misc{2025_AutoSteer,
   author        = {Lyucheng Wu and 
-                  Mengru Wang and 
-                  Ziwen Xu and 
-                  Tri Cao and 
-                  Nay Oo and 
-                  Bryan Hooi and 
-                  Shumin Deng},
+                   Mengru Wang and 
+                   Ziwen Xu and 
+                   Tri Cao and 
+                   Nay Oo and 
+                   Bryan Hooi and 
+                   Shumin Deng},
   title         = {Automating Steering for Safe Multimodal Large Language Models},
   eprint        = {2507.13255},
   archivePrefix = {arXiv},

@@ -209,7 +209,7 @@ AutoSteer_final/
 
 ## 📬 Contact
 
-For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact me via lyuchengwu@zju.edu.cn or shumin@nus.edu.sg.
+For any questions or issues, feel free to open an [issue](https://github.com/zjunlp/AutoSteer/issues) or contact us via lyuchengwu@zju.edu.cn / lyuchengwu@u.nus.edu or shumin@nus.edu.sg / 231sm@zju.edu.cn.
 
 ---
 
@@ -217,7 +217,7 @@ For any questions or issues, feel free to open an [issue](https://github.com/zju
 📋 Thank you very much for your interest in our work. If you use or extend our work, please cite the following paper:
 
 ```bibtex
-@misc{2025_AutoSteer,
+@inproceedings{EMNLP2025_AutoSteer,
   author        = {Lyucheng Wu and 
                    Mengru Wang and 
                    Ziwen Xu and 
@@ -226,9 +226,8 @@ For any questions or issues, feel free to open an [issue](https://github.com/zju
                    Bryan Hooi and 
                    Shumin Deng},
   title         = {Automating Steering for Safe Multimodal Large Language Models},
-  eprint        = {2507.13255},
-  archivePrefix = {arXiv},
-  primaryClass  = {cs.CL},
+  booktitle     = {{EMNLP} {(1)}},
+  publisher     = {Association for Computational Linguistics},
   year          = {2025},
   url           = {https://arxiv.org/abs/2507.13255}
 }
